@@ -1,0 +1,3 @@
+flask
+# TODO: Phase 2 dependencies
+# qrcode[pil]

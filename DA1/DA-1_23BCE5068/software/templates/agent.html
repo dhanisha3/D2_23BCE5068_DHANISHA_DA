@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+
+{% block title %}Delivery Agent Portal - Secure Locker System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-truck"></i> Delivery Agent Portal</h2>
+    <p style="color: var(--gray-300); font-size: 1.1rem;">Scan QR codes to deposit parcels in lockers</p>
+</div>
+
+{% if message %}
+<div class="alert {% if success %}alert-success{% else %}alert-error{% endif %}">
+    {{ message }}
+    <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+</div>
+{% endif %}
+
+{% if step == 'deposit_success' %}
+<div class="card" style="border: 2px solid #86efac;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <div
+            style="width: 80px; height: 80px; background: var(--success); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);">
+            <i class="fas fa-unlock"></i>
+        </div>
+        <h3 style="color: var(--success); margin-bottom: 10px;">Locker Opened Successfully!</h3>
+        <p style="color: var(--gray-600);">The locker is now open for parcel deposit</p>
+    </div>
+
+    <div
+        style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 15px; margin-bottom: 25px; box-shadow: var(--shadow-md); border: 1px solid rgba(255, 255, 255, 0.2);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <p style="color: var(--gray-300); font-size: 0.875rem; margin-bottom: 5px;">Locker ID</p>
+                <p style="font-size: 1.25rem; font-weight: 600; color: white;">{{ locker_id }}</p>
+            </div>
+            <div>
+                <p style="color: var(--gray-300); font-size: 0.875rem; margin-bottom: 5px;">Delivery ID</p>
+                <p style="font-size: 1.25rem; font-weight: 600; color: white;">{{ delivery_id }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="padding: 25px; border-radius: 15px; margin: 25px 0; border: 1px solid #a5b4fc;">
+        <h4 style="color: var(--primary); margin-bottom: 15px;">
+            <i class="fas fa-clipboard-list"></i> Deposit Instructions
+        </h4>
+        <ol style="margin-left: 20px; color: var(--gray-700); line-height: 1.8;">
+            <li style="margin-bottom: 10px;">
+                <strong>Place the parcel</strong> carefully inside the locker
+                <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 5px;">
+                    Ensure the package fits comfortably without forcing
+                </div>
+            </li>
+            <li style="margin-bottom: 10px;">
+                <strong>Verify contents</strong> match the delivery order
+                <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 5px;">
+                    Double-check the delivery ID on the package
+                </div>
+            </li>
+            <li style="margin-bottom: 10px;">
+                <strong>Close the door</strong> firmly until you hear a click
+                <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 5px;">
+                    The door should be completely flush with the locker frame
+                </div>
+            </li>
+            <li>
+                <strong>Click "Lock Locker"</strong> below to secure the delivery
+                <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 5px;">
+                    This will activate the electronic lock and notify the customer
+                </div>
+            </li>
+        </ol>
+    </div>
+
+    <form method="POST" style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+        <input type="hidden" name="action" value="close_deposit">
+        <input type="hidden" name="locker_id" value="{{ locker_id }}">
+        <button type="submit" class="btn btn-success" style="padding: 16px 40px; font-size: 1.1rem;">
+            <i class="fas fa-lock"></i> Lock Locker
+        </button>
+        <a href="/agent" class="btn btn-secondary" style="padding: 16px 40px; font-size: 1.1rem;">
+            <i class="fas fa-times"></i> Cancel
+        </a>
+    </form>
+</div>
+
+{% elif step == 'deposit_complete' %}
+<div class="card" style="text-align: center; padding: 50px;">
+    <div
+        style="width: 100px; height: 100px; background: linear-gradient(135deg, var(--success) 0%, #059669 100%); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 3rem; margin-bottom: 30px; box-shadow: 0 15px 35px rgba(16, 185, 129, 0.3);">
+        <i class="fas fa-check"></i>
+    </div>
+
+    <h3 style="font-size: 2rem; color: var(--success); margin-bottom: 15px;">Delivery Complete!</h3>
+    <p style="font-size: 1.1rem; color: var(--gray-600); margin-bottom: 30px;">
+        Parcel has been successfully deposited and the locker is secured.
+    </p>
+
+    <div style="background: var(--gray-50); padding: 25px; border-radius: 15px; margin: 30px auto; max-width: 400px;">
+        <div style="display: grid; gap: 15px;">
+            <div>
+                <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: 5px;">Locker</p>
+                <p style="font-size: 1.25rem; font-weight: 600;">{{ locker_id }}</p>
+            </div>
+            <div>
+                <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: 5px;">Status</p>
+                <p style="font-size: 1.1rem; color: var(--success); font-weight: 600;">
+                    <i class="fas fa-check-circle"></i> Ready for customer pickup
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 40px;">
+        <a href="/agent" class="btn" style="padding: 16px 40px;">
+            <i class="fas fa-plus"></i> Make Another Delivery
+        </a>
+        <a href="/" class="btn btn-secondary" style="padding: 16px 40px;">
+            <i class="fas fa-dashboard"></i> View Dashboard
+        </a>
+    </div>
+</div>
+
+{% else %}
+<div class="card">
+    <h3><i class="fas fa-qrcode"></i> Deposit Parcel</h3>
+    <form method="POST" id="depositForm">
+        <input type="hidden" name="action" value="deposit">
+
+        <div class="form-group">
+            <label for="qr_token">
+                <i class="fas fa-qrcode"></i> Agent QR Code
+                <span style="color: var(--danger);">*</span>
+            </label>
+            <div style="position: relative;">
+                <input type="text" id="qr_token" name="qr_token" required placeholder="Scan or paste your QR code token"
+                    value="{{ request.form.qr_token or '' }}" style="padding-right: 50px;">
+                <button type="button" onclick="startQRScanner()"
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-camera"></i>
+                </button>
+            </div>
+            <small>This is the QR code provided by the ecommerce platform</small>
+        </div>
+
+        <div class="form-group">
+            <label for="locker_id">
+                <i class="fas fa-box"></i> Select Locker
+                <span style="color: var(--danger);">*</span>
+            </label>
+            <select id="locker_id" name="locker_id" required>
+                <option value="">Choose a locker...</option>
+                {% for locker in lockers %}
+                <option value="{{ locker.locker_id }}" {% if request.form.locker_id==locker.locker_id %}selected{% endif
+                    %} {% if locker.has_parcel %}disabled{% endif %}>
+                    {{ locker.locker_id }} - {{ locker.location }}
+                    {% if locker.has_parcel %}
+                    (Occupied)
+                    {% else %}
+                    (Available)
+                    {% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
+            <button type="submit" class="btn" style="flex: 1; padding: 16px;">
+                <i class="fas fa-unlock"></i> Open Locker for Deposit
+            </button>
+            <a href="/" class="btn btn-secondary" style="padding: 16px 30px;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<!-- Locker Status Overview -->
+<div class="card">
+    <h3><i class="fas fa-th-large"></i> Locker Status</h3>
+    <div class="status-grid">
+        {% for locker in lockers %}
+        <div class="status-card" style="position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <h4 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                    <span
+                        class="status-indicator {% if locker.has_parcel %}status-occupied{% elif locker.is_locked %}status-available{% else %}status-locked{% endif %}"></span>
+                    {{ locker.locker_id }}
+                </h4>
+                <div class="{{ 'text-warning' if locker.has_parcel else ('text-success' if locker.is_locked else 'text-danger') }}"
+                    style="font-size: 1.5rem;">
+                    {% if locker.has_parcel %}
+                    <i class="fas fa-box"></i>
+                    {% elif locker.is_locked %}
+                    <i class="fas fa-unlock"></i>
+                    {% else %}
+                    <i class="fas fa-lock"></i>
+                    {% endif %}
+                </div>
+            </div>
+
+            <p style="margin: 8px 0; color: var(--gray-600);">
+                <i class="fas fa-map-marker-alt" style="width: 16px; color: var(--gray-400);"></i>
+                {{ locker.location }}
+            </p>
+
+            <p style="margin: 8px 0; font-weight: 600;">
+                <i class="fas fa-info-circle" style="width: 16px; color: var(--gray-400);"></i>
+                {% if locker.has_parcel %}
+                Occupied ({{ locker.delivery_status|replace('_', ' ')|title }})
+                {% elif locker.is_locked %}
+                Available
+                {% else %}
+                Unlocked
+                {% endif %}
+            </p>
+
+            {% if locker.has_parcel %}
+            <div style="background: var(--gray-50); padding: 12px; border-radius: 8px; margin-top: 15px;">
+                <p style="margin: 5px 0; font-size: 0.875rem;">
+                    <i class="fas fa-hashtag" style="width: 16px; color: var(--gray-400);"></i>
+                    <strong>Delivery:</strong> {{ locker.current_delivery }}
+                </p>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 15px;">
+                {% if locker.has_parcel %}
+                {% if locker.delivery_status == 'deposited' %}
+                <span class="badge badge-warning" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-clock"></i> Processing
+                </span>
+                {% elif locker.delivery_status == 'ready_for_pickup' %}
+                <span class="badge badge-success" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-check"></i> Ready
+                </span>
+                {% endif %}
+                {% else %}
+                <span class="badge badge-success" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-check-circle"></i> Available
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- QR Code Scanner Guide -->
+<div class="card">
+    <h3><i class="fas fa-mobile-alt"></i> QR Code Scanner Guide</h3>
+    <div style="padding: 25px; border-radius: 15px; margin-top: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+            <div style="text-align: center;">
+                <div
+                    style="width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px;">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4 style="margin-bottom: 10px;">Step 1: Open Camera</h4>
+                <p style="color: var(--gray-600); font-size: 0.9rem;">
+                    Open your phone's camera or QR scanner app
+                </p>
+            </div>
+
+            <div style="text-align: center;">
+                <div
+                    style="width: 60px; height: 60px; background: var(--success); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px;">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <h4 style="margin-bottom: 10px;">Step 2: Scan QR Code</h4>
+                <p style="color: var(--gray-600); font-size: 0.9rem;">
+                    Point camera at the QR code from ecommerce platform
+                </p>
+            </div>
+
+            <div style="text-align: center;">
+                <div
+                    style="width: 60px; height: 60px; background: var(--warning); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px;">
+                    <i class="fas fa-copy"></i>
+                </div>
+                <h4 style="margin-bottom: 10px;">Step 3: Copy Token</h4>
+                <p style="color: var(--gray-600); font-size: 0.9rem;">
+                    Copy the scanned text/token that appears
+                </p>
+            </div>
+
+            <div style="text-align: center;">
+                <div
+                    style="width: 60px; height: 60px; background: var(--info); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px;">
+                    <i class="fas fa-paste"></i>
+                </div>
+                <h4 style="margin-bottom: 10px;">Step 4: Paste Here</h4>
+                <p style="color: var(--gray-600); font-size: 0.9rem;">
+                    Paste token in the "Agent QR Code" field above
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tips and Best Practices -->
+<div class="card">
+    <h3><i class="fas fa-lightbulb"></i> Delivery Tips & Best Practices</h3>
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+        <div
+            style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; border: 1px solid #f59e0b;">
+            <h4 style="color: #92400e; margin-bottom: 10px;">
+                <i class="fas fa-shield-alt"></i> Security
+            </h4>
+            <ul style="color: #78350f; margin-left: 20px; line-height: 1.6;">
+                <li>Always verify QR code authenticity</li>
+                <li>Check delivery ID matches package label</li>
+                <li>Ensure locker is properly locked after deposit</li>
+                <li>Report any suspicious activity immediately</li>
+            </ul>
+        </div>
+
+        <div
+            style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; border: 1px solid #3b82f6;">
+            <h4 style="color: #1e40af; margin-bottom: 10px;">
+                <i class="fas fa-clock"></i> Efficiency
+            </h4>
+            <ul style="color: #1e3a8a; margin-left: 20px; line-height: 1.6;">
+                <li>Pre-scan QR codes before arriving</li>
+                <li>Choose lockers close to your route</li>
+                <li>Handle fragile items with extra care</li>
+                <li>Complete deposits during off-peak hours</li>
+            </ul>
+        </div>
+
+        <div
+            style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding: 20px; border-radius: 12px; border: 1px solid #10b981;">
+            <h4 style="color: #047857; margin-bottom: 10px;">
+                <i class="fas fa-thumbs-up"></i> Quality
+            </h4>
+            <ul style="color: #065f46; margin-left: 20px; line-height: 1.6;">
+                <li>Protect packages from weather</li>
+                <li>Position items to prevent damage</li>
+                <li>Take photos for delivery confirmation</li>
+                <li>Update delivery status promptly</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-focus on QR token input
+    document.addEventListener('DOMContentLoaded', function () {
+        const qrInput = document.getElementById('qr_token');
+        if (qrInput && !qrInput.value) {
+            qrInput.focus();
+        }
+
+        // Add real-time validation
+        if (qrInput) {
+            qrInput.addEventListener('input', function (e) {
+                validateQRToken(e.target);
+            });
+
+            qrInput.addEventListener('paste', function (e) {
+                setTimeout(() => validateQRToken(e.target), 100);
+            });
+        }
+
+        // Locker selection validation
+        const lockerSelect = document.getElementById('locker_id');
+        if (lockerSelect) {
+            lockerSelect.addEventListener('change', function (e) {
+                validateLockerSelection(e.target);
+            });
+        }
+
+        // Form submission with loading state
+        const form = document.getElementById('depositForm');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening Locker...';
+                    submitBtn.disabled = true;
+                }
+            });
+        }
+    });
+
+    function validateQRToken(input) {
+        const value = input.value.trim();
+        const parent = input.parentElement;
+
+        // Remove existing validation messages
+        const existingMsg = parent.querySelector('.validation-message');
+        if (existingMsg) existingMsg.remove();
+
+        if (value.length === 0) {
+            input.style.borderColor = '#e5e7eb';
+            return;
+        }
+
+        if (value.length < 10) {
+            input.style.borderColor = '#f59e0b';
+            showValidationMessage(parent, 'QR token seems too short', 'warning');
+        } else if (value.length >= 10) {
+            input.style.borderColor = '#10b981';
+            showValidationMessage(parent, 'QR token format looks good', 'success');
+        }
+    }
+
+    function validateLockerSelection(select) {
+        const selectedOption = select.options[select.selectedIndex];
+        const parent = select.parentElement;
+
+        // Remove existing validation messages
+        const existingMsg = parent.querySelector('.validation-message');
+        if (existingMsg) existingMsg.remove();
+
+        if (selectedOption.disabled) {
+            select.style.borderColor = '#ef4444';
+            showValidationMessage(parent, 'This locker is currently occupied', 'error');
+            select.value = '';
+        } else if (select.value) {
+            select.style.borderColor = '#10b981';
+            showValidationMessage(parent, 'Locker is available for deposit', 'success');
+        }
+    }
+
+    function showValidationMessage(parent, message, type) {
+        const msgElement = document.createElement('div');
+        msgElement.className = 'validation-message';
+        msgElement.style.cssText = `
+        font-size: 0.875rem;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: ${type === 'success' ? '#059669' : type === 'warning' ? '#d97706' : '#dc2626'};
+    `;
+
+        const icon = type === 'success' ? 'fa-check-circle' :
+            type === 'warning' ? 'fa-exclamation-triangle' :
+                'fa-times-circle';
+
+        msgElement.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+        parent.appendChild(msgElement);
+    }
+
+    function startQRScanner() {
+        // Simulate QR scanner functionality
+        showNotification('QR Scanner would open here in a real implementation', 'info');
+
+        // In a real implementation, this would:
+        // 1. Request camera permissions
+        // 2. Open camera view
+        // 3. Scan QR code
+        // 4. Extract token and populate input field
+
+        // For demo purposes, show a modal with instructions
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+    `;
+
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+        background: rgba(30, 41, 59, 0.95);
+        padding: 40px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        animation: slideUp 0.3s ease;
+    `;
+
+        modalContent.innerHTML = `
+        <div style="font-size: 4rem; color: var(--primary); margin-bottom: 20px;">
+            <i class="fas fa-camera"></i>
+        </div>
+        <h3 style="margin-bottom: 15px; color: white;">QR Code Scanner</h3>
+        <p style="color: var(--gray-300); margin-bottom: 25px;">
+            In a real implementation, this would open your device's camera to scan QR codes automatically.
+        </p>
+        <p style="color: var(--gray-300); margin-bottom: 30px;">
+            For now, please manually copy and paste your QR token into the input field.
+        </p>
+        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+                class="btn" style="padding: 12px 30px;">
+            <i class="fas fa-times"></i> Close
+        </button>
+    `;
+
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    // Add notification system
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(30, 41, 59, 0.95);
+        padding: 16px 24px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 300px;
+        z-index: 1000;
+        animation: slideInRight 0.3s ease-out;
+        border-left: 4px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+    `;
+
+        const icon = document.createElement('i');
+        icon.className = type === 'success' ? 'fas fa-check-circle' :
+            type === 'error' ? 'fas fa-exclamation-circle' :
+                'fas fa-info-circle';
+        icon.style.color = type === 'success' ? '#10b981' :
+            type === 'error' ? '#ef4444' :
+                '#3b82f6';
+        icon.style.fontSize = '1.25rem';
+
+        const text = document.createElement('span');
+        text.textContent = message;
+        text.style.color = 'white';
+
+        notification.appendChild(icon);
+        notification.appendChild(text);
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease-in';
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
+    }
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    @keyframes slideOutRight {
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+`;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

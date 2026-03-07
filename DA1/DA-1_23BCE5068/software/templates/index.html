@@ -1,0 +1,380 @@
+        {% extends "base.html" %}
+
+{% block title %}Dashboard - Secure Locker System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-chart-line"></i> System Dashboard</h2>
+    <p style="color: var(--gray-300); font-size: 1.1rem;">Monitor all lockers and deliveries in real-time</p>
+</div>
+
+<!-- Statistics Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 30px;">
+    <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); position: relative; overflow: hidden;">
+        <div style="position: relative; z-index: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <i class="fas fa-check-circle" style="font-size: 2.5rem; opacity: 0.9;"></i>
+                <span class="badge" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem;">AVAILABLE</span>
+            </div>
+            <h3 style="font-size: 3rem; font-weight: 700; margin: 0; line-height: 1;">{{ stats.available }}</h3>
+            <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 1rem;">Available Lockers</p>
+        </div>
+        <div style="position: absolute; bottom: -20px; right: -20px; font-size: 8rem; opacity: 0.1;">
+            <i class="fas fa-unlock"></i>
+        </div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3); position: relative; overflow: hidden;">
+        <div style="position: relative; z-index: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <i class="fas fa-box" style="font-size: 2.5rem; opacity: 0.9;"></i>
+                <span class="badge" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem;">OCCUPIED</span>
+            </div>
+            <h3 style="font-size: 3rem; font-weight: 700; margin: 0; line-height: 1;">{{ stats.occupied }}</h3>
+            <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 1rem;">Occupied Lockers</p>
+        </div>
+        <div style="position: absolute; bottom: -20px; right: -20px; font-size: 8rem; opacity: 0.1;">
+            <i class="fas fa-lock"></i>
+        </div>
+    </div>
+
+    <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); position: relative; overflow: hidden;">
+        <div style="position: relative; z-index: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <i class="fas fa-th" style="font-size: 2.5rem; opacity: 0.9;"></i>
+                <span class="badge" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem;">TOTAL</span>
+            </div>
+            <h3 style="font-size: 3rem; font-weight: 700; margin: 0; line-height: 1;">{{ stats.total }}</h3>
+            <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 1rem;">Total Lockers</p>
+        </div>
+        <div style="position: absolute; bottom: -20px; right: -20px; font-size: 8rem; opacity: 0.1;">
+            <i class="fas fa-warehouse"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Locker Grid -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h3 style="margin: 0;"><i class="fas fa-th-large"></i> Locker Status Overview</h3>
+        <div style="margin-left: auto; display: flex; gap: 15px; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="status-indicator status-available"></span>
+                <span style="font-size: 0.875rem; color: var(--gray-300);">Available</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="status-indicator status-occupied"></span>
+                <span style="font-size: 0.875rem; color: var(--gray-300);">Occupied</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="status-indicator status-locked"></span>
+                <span style="font-size: 0.875rem; color: var(--gray-300);">Locked</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-grid">
+        {% for locker in lockers %}
+        <div class="status-card locker-card" data-locker-id="{{ locker.locker_id }}" style="cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                    <span class="status-indicator {% if locker.has_parcel %}status-occupied{% elif locker.is_locked %}status-locked{% else %}status-available{% endif %}"></span>
+                    {{ locker.locker_id }}
+                </h3>
+                <div class="locker-icon {{ 'text-warning' if locker.has_parcel else ('text-danger' if locker.is_locked else 'text-success') }}" style="font-size: 2rem;">
+                    {% if locker.has_parcel %}
+                        <i class="fas fa-box"></i>
+                    {% elif locker.is_locked %}
+                        <i class="fas fa-lock"></i>
+                    {% else %}
+                        <i class="fas fa-unlock"></i>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <p style="margin: 5px 0; color: var(--gray-300); font-size: 0.875rem;">
+                    <i class="fas fa-map-marker-alt" style="width: 20px; color: var(--gray-400);"></i>
+                    {{ locker.location }}
+                </p>
+                <p style="margin: 5px 0; font-weight: 600; color: var(--gray-200);">
+                    <i class="fas fa-info-circle" style="width: 20px; color: var(--gray-400);"></i>
+                    {% if locker.has_parcel %}
+                        Occupied ({{ locker.delivery_status|replace('_', ' ')|title }})
+                    {% elif locker.is_locked %}
+                        Locked & Available
+                    {% else %}
+                        Unlocked
+                    {% endif %}
+                </p>
+            </div>
+            
+            {% if locker.has_parcel %}
+            <div style="background: var(--gray-50); padding: 12px; border-radius: 10px; margin-top: 15px;">
+                <p style="margin: 5px 0; font-size: 0.875rem;">
+                    <i class="fas fa-user" style="width: 20px; color: var(--gray-400);"></i>
+                    <span style="color: var(--gray-300);">Customer:</span> 
+                    <span style="font-weight: 500;">***{{ locker.customer_phone }}</span>
+                </p>
+                <p style="margin: 5px 0; font-size: 0.875rem;">
+                    <i class="fas fa-hashtag" style="width: 20px; color: var(--gray-400);"></i>
+                    <span style="color: var(--gray-300);">Delivery:</span> 
+                    <span style="font-weight: 500;">{{ locker.current_delivery }}</span>
+                </p>
+            </div>
+            {% endif %}
+            
+            <div style="margin-top: 20px;">
+                {% if locker.has_parcel %}
+                    {% if locker.delivery_status == 'deposited' %}
+                        <span class="badge badge-warning" style="width: 100%; justify-content: center; padding: 8px;">
+                            <i class="fas fa-clock"></i> Waiting for pickup
+                        </span>
+                    {% elif locker.delivery_status == 'ready_for_pickup' %}
+                        <span class="badge badge-success" style="width: 100%; justify-content: center; padding: 8px;">
+                            <i class="fas fa-check"></i> Ready for pickup
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <span class="badge badge-success" style="width: 100%; justify-content: center; padding: 8px; background: var(--success);">
+                        <i class="fas fa-check-circle"></i> Available
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card" style="margin-top: 30px;">
+    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 25px;">
+        <a href="/ecommerce" class="action-button" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 20px; border-radius: 15px; text-decoration: none; text-align: center; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);">
+            <i class="fas fa-plus-circle" style="font-size: 2rem;"></i>
+            <span style="font-weight: 600;">Create New Delivery</span>
+        </a>
+        <a href="/agent" class="action-button" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 15px; text-decoration: none; text-align: center; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);">
+            <i class="fas fa-truck" style="font-size: 2rem;"></i>
+            <span style="font-weight: 600;">Agent Portal</span>
+        </a>
+        <a href="/customer" class="action-button" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 20px; border-radius: 15px; text-decoration: none; text-align: center; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);">
+            <i class="fas fa-user" style="font-size: 2rem;"></i>
+            <span style="font-weight: 600;">Customer Portal</span>
+        </a>
+        <button onclick="location.reload()" class="action-button" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white; padding: 20px; border-radius: 15px; border: none; cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 5px 15px rgba(107, 114, 128, 0.3); width: 100%;">
+            <i class="fas fa-sync-alt" style="font-size: 2rem;"></i>
+            <span style="font-weight: 600;">Refresh Status</span>
+        </button>
+    </div>
+</div>
+
+<!-- Activity Timeline -->
+<div class="card" style="margin-top: 30px;">
+    <h3><i class="fas fa-history"></i> Recent Activity</h3>
+    <div style="margin-top: 25px;">
+        <div class="timeline">
+            {% for locker in lockers[:5] %}
+            {% if locker.has_parcel %}
+            <div class="timeline-item" style="display: flex; gap: 20px; padding: 15px 0; border-bottom: 1px solid var(--gray-200);">
+                <div class="timeline-icon" style="width: 40px; height: 40px; background: var(--warning); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div style="flex: 1;">
+                    <p style="font-weight: 600; margin: 0;">Parcel in {{ locker.locker_id }}</p>
+                    <p style="color: var(--gray-300); font-size: 0.875rem; margin: 5px 0 0 0;">
+                        Delivery {{ locker.current_delivery }} - {{ locker.delivery_status|replace('_', ' ')|title }}
+                    </p>
+                </div>
+                <div style="text-align: right;">
+                    <span class="badge badge-warning">Active</span>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<style>
+.action-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+.locker-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.locker-card:hover .locker-icon {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+.timeline-item {
+    position: relative;
+    animation: fadeInLeft 0.5s ease-out;
+}
+
+.timeline-item:hover .timeline-icon {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Stat card animations */
+.stat-card {
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card h3 {
+    animation: countUp 1s ease-out;
+}
+
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-button {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<script>
+// Add interactive features
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate numbers on load
+    const animateValue = (element, start, end, duration) => {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            element.textContent = Math.floor(progress * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    };
+
+    // Animate stat numbers
+    const statNumbers = document.querySelectorAll('.stat-card h3');
+    statNumbers.forEach(stat => {
+        const value = parseInt(stat.textContent);
+        animateValue(stat, 0, value, 1000);
+    });
+
+    // Add click interaction to locker cards
+    document.querySelectorAll('.locker-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const lockerId = this.dataset.lockerId;
+            showLockerDetails(lockerId);
+        });
+    });
+
+    // Show locker details modal
+    function showLockerDetails(lockerId) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: rgba(30, 41, 59, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        `;
+        
+        modalContent.innerHTML = `
+            <h3 style="margin-bottom: 20px;">
+                <i class="fas fa-info-circle"></i> Locker ${lockerId} Details
+            </h3>
+            <p>Detailed information about this locker would appear here.</p>
+            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+                    class="btn btn-secondary" style="margin-top: 20px;">
+                <i class="fas fa-times"></i> Close
+            </button>
+        `;
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Real-time updates simulation
+    setInterval(() => {
+        // Add subtle pulse to occupied lockers
+        document.querySelectorAll('.status-occupied').forEach(indicator => {
+            indicator.style.animation = 'pulse 2s infinite';
+        });
+    }, 1000);
+});
+// keep the original ending only
+</script>
+{% endblock %}
